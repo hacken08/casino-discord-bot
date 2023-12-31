@@ -2,7 +2,7 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from Fire_data.cred import crds
+from cred import crds
 
 
 #  ... initializing firebase firestore ...../
@@ -76,7 +76,7 @@ def get_plyr_data(uid):
         return 'Player not found'
 
 
-def update_plyr_data(uid, key, value):
+def     update_plyr_data(uid, key, value):
     """
     Update player data
     :param value:

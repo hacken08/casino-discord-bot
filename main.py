@@ -4,7 +4,7 @@ import interactions
 from bot import client
 
 from snake_water_gun.menu import main_menu as mm
-from Fire_data import database as db
+import database as db
 
 CURRENT_PLAYER = ''
 
@@ -53,7 +53,7 @@ async def snake_water_gun(ctx: interactions.CommandContext):
         return
 
     #  Starting game
-    await ctx.send('# Snake Water Gun :-\n', components=mm.menu_options)
+    await ctx.send(f'# Snake Water Gun :-', components=mm.menu_options)
 
 
 

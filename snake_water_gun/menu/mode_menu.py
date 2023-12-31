@@ -1,6 +1,9 @@
-import time
 
+import time
 import interactions as interact
+
+from snake_water_gun.lib import game_func as gm_f
+from snake_water_gun.lib.single_player import choices
 from bot import client
 
 
@@ -23,19 +26,6 @@ mode_option = [
     )
 ]
 
-async def countdown_timer(ctx, seconds_left, countdown_msg: str):
-    send = countdown_msg.replace('<>', str(seconds_left))
-    new_msg = await ctx.send(send)
-
-    for i in range(seconds_left, 0, -1):
-        edit_msg = countdown_msg.replace('<>', f'{str(i-1)}')
-
-        await new_msg.edit(edit_msg)
-        time.sleep(0.5)
-
-    return new_msg
-
-
 @client.component('single_player')
 async def single_player(ctx: interact.CommandContext):
 
@@ -43,7 +33,15 @@ async def single_player(ctx: interact.CommandContext):
     new_msg = await ctx.channel.get_history()
     await new_msg[0].delete()
 
-    await countdown_timer(ctx, 5, 'Game starts in ** <> **'.title())
+    # Counting.../
+    # game_start = await ctx.send('# Game starts in **<>**'.title())
+    #
+    # await gm_f.countdown_timer(ctx, 3, game_start)
+    # new_msg = await ctx.channel.get_history()
+
+    # Giving choices.../
+    # await new_msg[0].delete()
+    await  ctx.send(components=choices)
 
 
 @client.component('multi_player')
@@ -53,6 +51,6 @@ async def multi_player(ctx: interact.CommandContext):
     new_msg = await ctx.channel.get_history()
     await new_msg[0].delete()
 
-    await countdown_timer(ctx, 4, 'Game starts in ** <> **'.title())
+    await ctx.send('Coming soon')
 
 

@@ -56,7 +56,7 @@ def play_game():
             print()
 
 def how_to_play():
-    with open('../menu/description.txt', 'r') as f:
+    with open('../menu/txt.py', 'r') as f:
         print(f.read())
 
     while True:

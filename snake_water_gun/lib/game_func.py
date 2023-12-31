@@ -1,87 +1,104 @@
+
 import random
 import time
+import interactions
 
-SCORES = {'Snake': 3, 'Water': 5, 'Gun': 7}
-CHOICE = {
-    's': 'Snake',
-    'w': 'Water',
-    'g': 'Gun'
-}
+import database as db
+from snake_water_gun.lib import status_messages as win
+
 plr_score = 0
 
-
-def print_countdown(seconds):
+async def countdown_timer(ctx, seconds_left, new_msg: interactions.api.models.message.Message):
     """
-    Print countdown before the round starts.
-    :param seconds:
+    Countdown timer
+    Args:
+        ctx:
+        new_msg:
+        seconds_left:
+
+    Returns:
+
     """
-    for i in range(seconds, -1, -1):
-        animation(f"| Game starting in {i} seconds<>", 1, 1)
+
+    for i in range(seconds_left, 0, -1):
+        edit_msg = new_msg.content.replace(str(seconds_left), f'{str(i-1)}')
+
+        await new_msg.edit(edit_msg)
+        time.sleep(0.5)
+
+    return new_msg
 
 
-def get_user_choice(name):
-    """
-    Get the user's choice for the game.
-    :pram name
-    :return plyr and cpu choices
-    """
-    while True:
-        try:
-            user_choice = CHOICE[input(f"\r| {name} is choosing: ").lower()]
-            cpu_choice = random.choice(list(CHOICE.values()))
-            return user_choice, cpu_choice
-
-        except (KeyError, ValueError):
-            for _ in range(3, -1, -1):
-                animation(f'| Invalid choice! try again in {_} seconds<>', 1, 1)
-
-            print('\n')
-
-
-
-def chk_result(name, plyr_choice, cpu_choice):
+def chk_result(CHOICE, name, plyr_choice, cpu_choice):
     """
     Check plyr choice and cpu choice
+    :param CHOICE
     :param name:
     :param plyr_choice:
     :param cpu_choice:
     :return: winner choice
     """
-    if plyr_choice == 'Snake' and cpu_choice == 'Water':
-        return f"\n| {name} winn this with {plyr_choice} (^▽^) !! ", plyr_choice
+    #  some random status message for user......../
+    snake_win = random.choice(win.snake_win_msgs)
+    snake_win = new_line(snake_win)
 
-    elif plyr_choice == 'Water' and cpu_choice == 'Gun':
-        return f"\n| {name} winn this with {plyr_choice} (^▽^) !! ", plyr_choice
+    water_win = random.choice(win.water_win_msgs)
+    water_win = new_line(water_win)
 
-    elif plyr_choice == 'Gun' and cpu_choice == 'Snake':
-        return f"\n| {name} winn this with {plyr_choice} (^▽^) !! ", plyr_choice
+    gun_win = random.choice(win.gun_win_msgs)
+    gun_win = new_line(gun_win)
+
+    draw = random.choice(win.draw_msgs)
+    draw = new_line(draw)
+
+    loss = random.choice(win.loss_msgs)
+    loss = new_line(loss)
+
+
+    # Checking if user is losing or winning..../
+    if plyr_choice == CHOICE['s'] and cpu_choice == CHOICE['w']:
+        return {f"{snake_win}", plyr_choice}
+
+    elif plyr_choice == CHOICE['w'] and cpu_choice == CHOICE['g']:
+        return f"{water_win}", plyr_choice
+
+    elif plyr_choice == CHOICE['g'] and cpu_choice == CHOICE['s']:
+        return f"{gun_win}", plyr_choice
 
     elif plyr_choice == cpu_choice:
-        return f"\n| {name} Draw this with {plyr_choice} (>_<) !!", 'draw'
+        return f"{draw}", 'draw'
 
     else:
-        return f"\n| {name} lose this with {plyr_choice} (x_x) !! ", cpu_choice
+        return f"{loss}", cpu_choice
 
 
-def update_scr(winner_val, user_choice, cpu_choice):
+async def updt_bal(ctx: interactions.CommandContext,bal, winner_val, plyr_choice, cpu_choice):
     """
     Updates the score of player according to win and lose
+    :param bal:
+    :param ctx:
     :param winner_val:
-    :param user_choice:
+    :param plyr_choice:
     :param cpu_choice:
     :return: updated score
     """
-    global plr_score
-    if winner_val == user_choice and winner_val != cpu_choice:
-        plr_score += SCORES[user_choice]
+    user = ctx.user.username
 
-    elif winner_val == cpu_choice and winner_val != user_choice:
-        plr_score -= SCORES[user_choice]
+    #  User data
+    data = db.get_plyr_data(user)
+    balance = data['balance']['value']
+
+
+    if winner_val == plyr_choice and winner_val != cpu_choice:
+        balance += bal[plyr_choice]
+
+    elif winner_val == cpu_choice and winner_val != plyr_choice:
+        balance -= bal[plyr_choice]
 
     elif winner_val == 'draw':
-        plr_score = plr_score
+        return
 
-    return plr_score
+    db.update_plyr_data(user, 'balance.value', balance)
 
 
 def want_to_play_again():
@@ -102,20 +119,6 @@ def want_to_play_again():
             print('Invalid input. Try again.')
 
 
-def animation(msg, dur, cnt=random.randrange(1, 4)):
-    """
-     Animate waiting messages
-    :param msg:
-    :param dur:
-    :param cnt:
-    """
-    animation = ['.', '..', '...']
-
-    for i in range(cnt):
-        for _ in range(0, 3):
-            print(f'\r{msg.replace("<>", animation[_])}', end='', flush=True)
-            time.sleep(0.3)
-        time.sleep(dur-0.9)
 
 def reset():
     """
@@ -130,3 +133,7 @@ def reset():
     print('menu...')
     time.sleep(1.3)
 
+def new_line(input_string):
+    words = input_string.split()
+    output_string = '\n |   '.join(' '.join(words[i:i + 5]) for i in range(0, len(words), 5))
+    return output_string
