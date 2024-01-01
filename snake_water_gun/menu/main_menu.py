@@ -51,6 +51,7 @@ menu_options = (
 async def _play_game(ctx: interactions.CommandContext):
 
     if not is_current_user(ctx):
+        await ctx.send('❌**|** You can\'t **interfere, another player** in game.')
         return
 
     await  ctx.send('# Mode:-',components=mode_option)

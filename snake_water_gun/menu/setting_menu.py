@@ -4,13 +4,14 @@ from bot import client
 # from main_menu import menu_options
 
 STYLE = interactions.ButtonStyle.SECONDARY  # Button Style
+play_style = 'Buttons'
 
 #  ..... Settings options:- ...../
 settings_option = [
     interactions.ActionRow(
         components=[
             interactions.Button(
-                    label="Wait for next round".title(),
+                    label=f"Play style {play_style}".title(),
                     custom_id='next_round_wait',
                     style=STYLE,
             ),

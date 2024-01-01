@@ -57,7 +57,7 @@ def chk_result(CHOICE, name, plyr_choice, cpu_choice):
 
     # Checking if user is losing or winning..../
     if plyr_choice == CHOICE['s'] and cpu_choice == CHOICE['w']:
-        return {f"{snake_win}", plyr_choice}
+        return f"{snake_win}", plyr_choice
 
     elif plyr_choice == CHOICE['w'] and cpu_choice == CHOICE['g']:
         return f"{water_win}", plyr_choice
@@ -101,6 +101,22 @@ async def updt_bal(ctx: interactions.CommandContext,bal, winner_val, plyr_choice
     db.update_plyr_data(user, 'balance.value', balance)
 
 
+async def updating_stats(ctx: interactions.CommandContext, wins, loses, draws):
+    data = db.get_plyr_data(ctx.user.username)
+
+    total_wins = data['games']['snake water gun']['wins']
+    total_loses = data['games']['snake water gun']['loses']
+    total_draws = data['games']['snake water gun']['draws']
+
+    total_wins += wins  # Remove the comma here
+    total_loses += loses  # Remove the comma here
+    total_draws += draws  # Remove the comma here
+
+    db.update_plyr_data(ctx.user.username, 'games.snake water gun.wins', total_wins)
+    db.update_plyr_data(ctx.user.username, 'games.snake water gun.loses', total_loses)
+    db.update_plyr_data(ctx.user.username, 'games.snake water gun.draws', total_draws)
+
+
 def want_to_play_again():
     """
     Asks the user to play again
@@ -135,5 +151,10 @@ def reset():
 
 def new_line(input_string):
     words = input_string.split()
-    output_string = '\n |   '.join(' '.join(words[i:i + 5]) for i in range(0, len(words), 5))
+
+    if len(words[5]) > 22:
+        output_string = '\n |   '.join(' '.join(words[i:i + 5]) for i in range(0, len(words), 5))
+        return output_string
+
+    output_string = '\n |   '.join(' '.join(words[i:i + 6]) for i in range(0, len(words), 6))
     return output_string

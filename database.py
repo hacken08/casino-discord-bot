@@ -18,19 +18,12 @@ def create_player(player_uid, name, email, bot: bool, avatar, date):
     info = {
         'games': {
             'snake water gun': {
-                'stats': {
-                    'max score': 0,
-                    'current score': 0,
-                    'wines': 0,
-                    'lose': 0
-                },
+                'wins': 0,
+                'loses': 0,
+                'draws': 0,
             },
-            'slot machine': {
-                'stats': {}
-            },
-            'betting': {
-                'stats': {}
-            }
+            'slot machine': {},
+            'betting': {}
         },
         'balance': {
             'value': 0,

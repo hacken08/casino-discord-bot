@@ -6,6 +6,9 @@ from bot import client
 from snake_water_gun.menu import main_menu as mm
 import database as db
 
+
+
+
 CURRENT_PLAYER = ''
 
 #  ........ Creating new player ........../
