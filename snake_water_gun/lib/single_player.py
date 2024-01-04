@@ -1,12 +1,13 @@
 import random
 import time
-
 import interactions as interact
+
 import database as db
+import main as m
+from bot import client
 
 from snake_water_gun.lib import game_func as gm_f
-from bot import client
-import main as m
+from snake_water_gun.menu import main_menu as mm
 
 STYLE = interact.ButtonStyle.SUCCESS
 BETTING_AMT = {
@@ -20,6 +21,7 @@ CHOICES = {
     'g': ':gun: gun',
 }
 
+select_and_del = interact.api.models.message.Message()
 rounds = 1
 wins = 0
 loses = 0
@@ -43,6 +45,11 @@ choices = [
                     custom_id="gun",
                     style=STYLE,
             ),
+            interact.Button(
+                    label='Exist to main menu'.title(),
+                    custom_id="quite",
+                    style=interact.ButtonStyle.DANGER,
+            ),
         ]
     )
 ]
@@ -54,6 +61,7 @@ async def playing(ctx: interact.CommandContext, key_cio: str):
     global wins
     global loses
     global draws
+    global select_and_del
 
     plyr_name = ctx.author.name
     if len(plyr_name) > 7:
@@ -77,7 +85,7 @@ async def playing(ctx: interact.CommandContext, key_cio: str):
                                         f'\n |  ───── :gear: *Checking Result* :gear: ───── |'
                                         f'\n |'
                                         )
-    time.sleep(1.5)
+    time.sleep(1.2)
 
     winner = gm_f.chk_result(
         CHOICE=CHOICES,
@@ -133,18 +141,19 @@ async def playing(ctx: interact.CommandContext, key_cio: str):
 
     #  Next Round.../
     rounds += 1
-    await ctx.send(components=choices)
+    select_and_del = await ctx.send(components=choices)
 
 
 #  .................... choice snake ..................../
 @client.component('snake')
 async def water(ctx: interact.CommandContext):
+    global select_and_del
+
     if not m.is_current_user(ctx):
-        await ctx.send('❌**|** You can\'t **interfere, another player** in game.')
+        await ctx.send(m.INTERFERE_MSG)
         return
 
-    to_del = await ctx.channel.get_history()
-    await  to_del[0].delete()
+    await select_and_del.delete()
 
     await playing(ctx, 's')
     await gm_f.updating_stats(ctx, wins, loses, draws)
@@ -153,9 +162,13 @@ async def water(ctx: interact.CommandContext):
 #  .................... Choice water ..................../
 @client.component('water')
 async def water(ctx: interact.CommandContext):
+    global select_and_del
+
     if not m.is_current_user(ctx):
-        await ctx.send('❌**|** You can\'t **interfere, another player** in game.')
+        await ctx.send(m.INTERFERE_MSG)
         return
+
+    await select_and_del.delete()
 
     to_del = await ctx.channel.get_history()
     await  to_del[0].delete()
@@ -167,12 +180,31 @@ async def water(ctx: interact.CommandContext):
 #  .................... Choice gun ..................../
 @client.component("gun")
 async def gun(ctx: interact.CommandContext):
+    global select_and_del
+
     if not m.is_current_user(ctx):
-        await ctx.send('❌**|** You can\'t **interfere, another player** in game.')
+        await ctx.send(m.INTERFERE_MSG)
         return
+
+    await select_and_del.delete()
 
     to_del = await ctx.channel.get_history()
     await  to_del[0].delete()
 
     await playing(ctx, 'g')
     await gm_f.updating_stats(ctx, wins, loses, draws)
+
+
+#  .................... Choice gun ..................../
+@client.component('quite')
+async def quite(ctx: interact.CommandContext):
+    global select_and_del
+    global rounds
+
+    if not m.is_current_user(ctx):
+        await ctx.send(m.INTERFERE_MSG)
+        return
+    await select_and_del.delete()
+
+    rounds = 1
+    mm.select_and_del = await ctx.send('# Main Menu:-\n', components=menu_option)

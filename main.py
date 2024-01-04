@@ -7,9 +7,9 @@ from snake_water_gun.menu import main_menu as mm
 import database as db
 
 
-
-
 CURRENT_PLAYER = ''
+ERROR_MSG_INTERVEL = 2.5
+INTERFERE_MSG = '❌**|** You can\'t **interfere, another player** in game.'
 
 #  ........ Creating new player ........../
 @client.command(description='join with casino')
@@ -18,7 +18,10 @@ async def join(ctx: interactions.CommandContext):
     new = db.is_plyr_new(user.username)
 
     if not new:
-        await ctx.send(f'**|**  **{ctx.author.name}**  already **joined** this casino :handshake:')
+        msg = await ctx.send(f'**|**  **{ctx.author.name}**  already **joined** this casino :handshake:')
+        # time.sleep(ERROR_MSG_INTERVEL)
+        #
+        # await msg.delete()
         return
 
     try:
@@ -31,8 +34,12 @@ async def join(ctx: interactions.CommandContext):
             date=time.ctime(),
         )
         await ctx.send(f' **|**  **{ctx.author.name}** have **joined** our casino, **successfully**   :white_check_mark:')
+
     except Exception as e:
-        await ctx.send('⛔ **|**  Something went wrong ')
+        msg = await ctx.send('⛔ **|**  Something went wrong ')
+        time.sleep(ERROR_MSG_INTERVEL)
+
+        await msg.delete()
         print(e)
 
 
@@ -48,15 +55,15 @@ async def snake_water_gun(ctx: interactions.CommandContext):
 
     #  Checking if user exits
     if db.is_plyr_new(ctx.user.username):
-        await ctx.send('❌**|**   Player **Not Found**. Please **Join** casino first  😿')
-        time.sleep(5)
+        msg = await ctx.send('❌**|**   Player **Not Found**. Please **Join** casino first  😿')
+        time.sleep(ERROR_MSG_INTERVEL)
 
-        new_msg = await ctx.channel.get_history()
-        await new_msg[0].delete()
+        await msg.delete()
         return
 
     #  Starting game
-    await ctx.send(f'# Snake Water Gun :-', components=mm.menu_options)
+    mm.select_and_del = await ctx.send(f'# Snake Water Gun :-', components=mm.menu_options)
+    # await sel_and_del(msg)
 
 
 
@@ -65,7 +72,9 @@ async def slot(ctx: interactions.CommandContext):
     """
     To play slot machine
     """
-    await ctx.send('This game will come soon')
+    msg = await ctx.send('This game will come soon')
+    time.sleep(ERROR_MSG_INTERVEL)
+    await msg.delete()
 
 
 
@@ -74,7 +83,9 @@ async def coin_flip(ctx: interactions.CommandContext):
     """
     To play slot machine
     """
-    await ctx.send('This game will come soon')
+    msg = await ctx.send('This game will come soon')
+    time.sleep(ERROR_MSG_INTERVEL)
+    await msg.delete()
 
 
 #  ......... Additional commands ........./
@@ -85,7 +96,10 @@ async def balance(ctx: interactions.CommandContext):
     """
     #  Checking if user exits
     if db.is_plyr_new(ctx.user.username):
-        await ctx.send('❌ **|**  Your account **Not Found**. Please **Join** casino first  😿')
+        msg = await ctx.send('❌ **|**  Your account **Not Found**. Please **Join** casino first  😿')
+        time.sleep(ERROR_MSG_INTERVEL)
+
+        await msg.delete()
         return
 
     data = db.get_plyr_data(ctx.user.username)
