@@ -17,7 +17,7 @@ def create_player(player_uid, name, email, bot: bool, avatar, date):
     """
     info = {
         'games': {
-            'snake water gun': {
+            'snake_water_gun': {
                 'wins': 0,
                 'loses': 0,
                 'draws': 0,
@@ -69,13 +69,14 @@ def get_plyr_data(uid):
         return 'Player not found'
 
 
-def     update_plyr_data(uid, key, value):
+def update_plyr_data(uid, key, value):
     """
     Update player data
     :param value:
     :param uid:
     :param key:
     """
+
     player = db.collection('bot users').document(uid)
     player.update({key: value})
 
@@ -85,3 +86,11 @@ def del_plyr(user):
     return True
 
 
+if __name__ == '__main__':
+    val = {
+        'games.snake_water_gun.wins': 322,
+        'games.snake_water_gun.loses': 23,
+        'games.snake_water_gun.draws': 44,
+    }
+    for key, value in val.items():
+        update_plyr_data('nezuzko_', key, value)

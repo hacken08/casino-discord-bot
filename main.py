@@ -1,15 +1,13 @@
 import time
 
+from snake_water_gun.menu import main_menu as mm
+from snake_water_gun import custmizable as custm
+from snake_water_gun import basin_funct as bs_f
+
 import interactions
 from bot import client
-
-from snake_water_gun.menu import main_menu as mm
 import database as db
 
-
-CURRENT_PLAYER = ''
-ERROR_MSG_INTERVEL = 2.5
-INTERFERE_MSG = '❌**|** You can\'t **interfere, another player** in game.'
 
 #  ........ Creating new player ........../
 @client.command(description='join with casino')
@@ -19,7 +17,7 @@ async def join(ctx: interactions.CommandContext):
 
     if not new:
         msg = await ctx.send(f'**|**  **{ctx.author.name}**  already **joined** this casino :handshake:')
-        # time.sleep(ERROR_MSG_INTERVEL)
+        # time.sleep(ERROR_MSG_INTERVAL)
         #
         # await msg.delete()
         return
@@ -33,15 +31,15 @@ async def join(ctx: interactions.CommandContext):
             bot=user.bot,
             date=time.ctime(),
         )
-        await ctx.send(f' **|**  **{ctx.author.name}** have **joined** our casino, **successfully**   :white_check_mark:')
+        await ctx.send(
+            f' **|**  **{ctx.author.name}** have **joined** our casino, **successfully**   :white_check_mark:')
 
     except Exception as e:
         msg = await ctx.send('⛔ **|**  Something went wrong ')
-        time.sleep(ERROR_MSG_INTERVEL)
+        time.sleep(custm.ERROR_MSG_INTERVEL)
 
         await msg.delete()
         print(e)
-
 
 
 # ......... Running game ............/
@@ -50,21 +48,14 @@ async def snake_water_gun(ctx: interactions.CommandContext):
     """
     To play snake-water
     """
-    global CURRENT_PLAYER
-    CURRENT_PLAYER = ctx.user.username
+    custm.CURRENT_PLAYER = ctx.user.username
 
     #  Checking if user exits
-    if db.is_plyr_new(ctx.user.username):
-        msg = await ctx.send('❌**|**   Player **Not Found**. Please **Join** casino first  😿')
-        time.sleep(ERROR_MSG_INTERVEL)
-
-        await msg.delete()
+    if await bs_f.user_validation(ctx, new_player=True):
         return
 
     #  Starting game
     mm.select_and_del = await ctx.send(f'# Snake Water Gun :-', components=mm.menu_options)
-    # await sel_and_del(msg)
-
 
 
 @client.command(description='To play slot machine')
@@ -73,9 +64,8 @@ async def slot(ctx: interactions.CommandContext):
     To play slot machine
     """
     msg = await ctx.send('This game will come soon')
-    time.sleep(ERROR_MSG_INTERVEL)
+    time.sleep(custm.ERROR_MSG_INTERVEL)
     await msg.delete()
-
 
 
 @client.command(description='To play coin flip')
@@ -84,7 +74,7 @@ async def coin_flip(ctx: interactions.CommandContext):
     To play slot machine
     """
     msg = await ctx.send('This game will come soon')
-    time.sleep(ERROR_MSG_INTERVEL)
+    time.sleep(custm.ERROR_MSG_INTERVEL)
     await msg.delete()
 
 
@@ -97,7 +87,7 @@ async def balance(ctx: interactions.CommandContext):
     #  Checking if user exits
     if db.is_plyr_new(ctx.user.username):
         msg = await ctx.send('❌ **|**  Your account **Not Found**. Please **Join** casino first  😿')
-        time.sleep(ERROR_MSG_INTERVEL)
+        time.sleep(custm.ERROR_MSG_INTERVEL)
 
         await msg.delete()
         return
@@ -109,14 +99,5 @@ async def balance(ctx: interactions.CommandContext):
     await ctx.channel.send(show_bal)
 
 
-def is_current_user(ctx):
-    if ctx.user.username == CURRENT_PLAYER:
-        return True
-    else:
-        return False
-
-
-
 if __name__ == '__main__':
     client.start()
-

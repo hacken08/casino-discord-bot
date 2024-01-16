@@ -1,5 +1,5 @@
 
-description = """"
+description = """
 `
 -> **How to use commands:-**
     every action have specific command associate with like: "<cmd>) <action name>"
@@ -23,4 +23,4 @@ description = """"
         Win with gun   = 7
     4. Keep playing to break your own record
 `
- """
+"""

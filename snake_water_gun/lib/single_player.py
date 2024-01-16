@@ -1,82 +1,142 @@
 import random
-import time
+# import time
 import interactions as interact
 
-import database as db
-import main as m
-from bot import client
-
+from snake_water_gun import basin_funct as bs_f
 from snake_water_gun.lib import game_func as gm_f
+
+# from snake_water_gun.menu import setting_menu as sm
 from snake_water_gun.menu import main_menu as mm
 
-STYLE = interact.ButtonStyle.SUCCESS
-BETTING_AMT = {
-    ':snake: snake': 200,
-    ':ocean: water': 500,
-    ':gun: gun': 700
+from bot import client
+
+choice = {
+    1: ':snake: snake',
+    2: ':ocean: water',
+    3: ':gun: gun',
 }
-CHOICES = {
-    's': ':snake: snake',
-    'w': ':ocean: water',
-    'g': ':gun: gun',
+betting_amt = {
+    choice[1]: 200,
+    choice[2]: 500,
+    choice[3]: 700
 }
 
+STYLE = interact.ButtonStyle.SUCCESS
 select_and_del = interact.api.models.message.Message()
 rounds = 1
-wins = 0
-loses = 0
-draws = 0
 
 choices = [
     interact.ActionRow(
         components=[
             interact.Button(
-                    label='snake / 200rs'.title(),
-                    custom_id="snake",
-                    style=STYLE,
+                label=f'Snake / 200rs'.title(),
+                custom_id="snake",
+                style=STYLE,
             ),
             interact.Button(
-                    label='water / 500rs'.title(),
-                    custom_id="water",
-                    style=STYLE,
+                label=f'Water / 500rs'.title(),
+                custom_id="water",
+                style=STYLE,
             ),
             interact.Button(
-                    label='gun / 700rs'.title(),
-                    custom_id="gun",
-                    style=STYLE,
+                label=f'Gun / 700rs'.title(),
+                custom_id="gun",
+                style=STYLE,
             ),
             interact.Button(
-                    label='Exist to main menu'.title(),
-                    custom_id="quite",
-                    style=interact.ButtonStyle.DANGER,
+                label='Exist to main menu'.title(),
+                custom_id="quite",
+                style=interact.ButtonStyle.DANGER,
             ),
         ]
     )
 ]
 
 
+def choice_style(choices_style):
+    global choice
+    global choices
+    global betting_amt
+
+    display = ''
+    if choices_style == 'snake water gun':
+        choice = {
+            1: ':newspaper2: papers',
+            2: ':rock: rocks',
+            3: ':scissors: scissors',
+        }
+        choices_style = 'rock papers scissor'
+        display = 'Papers Rocks Scissors'
+
+    elif choices_style == 'rock papers scissor':
+        choice = {
+            1: ':snake: snake',
+            2: ':ocean: water',
+            3: ':gun: gun',
+        }
+        choices_style = 'snake water gun'
+        display = 'Snake Water Gun'
+
+    betting_amt = {
+        choice[1]: 200,
+        choice[2]: 500,
+        choice[3]: 700
+    }
+
+    display = display.split(' ')
+    choices = [
+        interact.ActionRow(
+            components=[
+                interact.Button(
+                    label=f'{display[1]} / 200rs'.title(),
+                    custom_id="snake",
+                    style=STYLE,
+                ),
+                interact.Button(
+                    label=f'{display[0]} / 500rs'.title(),
+                    custom_id="water",
+                    style=STYLE,
+                ),
+                interact.Button(
+                    label=f'{display[2]} / 700rs'.title(),
+                    custom_id="gun",
+                    style=STYLE,
+                ),
+                interact.Button(
+                    label='Exist to main menu'.title(),
+                    custom_id="quite",
+                    style=interact.ButtonStyle.DANGER,
+                ),
+            ]
+        )
+    ]
+    return choices_style
+
+
 #  ................. Playing  .................
-async def playing(ctx: interact.CommandContext, key_cio: str):
+async def playing(ctx: interact.CommandContext, key_cio: int):
+    """
+    Args:
+        ctx:
+        key_cio (object):
+    """
     global rounds
-    global wins
-    global loses
-    global draws
     global select_and_del
 
     plyr_name = ctx.author.name
     if len(plyr_name) > 7:
-        plyr_name = plyr_name[:7]+' . . .'
+        plyr_name = plyr_name[:7] + ' . . .'
 
     #  Round Counting.../
     original_msg = await ctx.send(f'╭─────── :dagger:  **Round {rounds}** :dagger:    ───────╮')
 
     #  Player input.../
-    plyr_choice = CHOICES[key_cio]
-    cpu_choice = random.choice(list(CHOICES.values()))
+    plyr_choice = choice[key_cio]
+    cpu_choice = gm_f.cpu_choice(plyr_choice, choice)
 
     # Player vs CPU.../
     msg = (f'{original_msg.content}'
-           f'\n |    **↓ {plyr_name} ↓              ↓ CPU ↓**'
+           f'\n |    **↓ {plyr_name} ↓                            ↓ CPU ↓**'
            f'\n |   {plyr_choice}          *** __vs__***       {cpu_choice}')
     vs_msg = await original_msg.edit(msg)
 
@@ -85,18 +145,15 @@ async def playing(ctx: interact.CommandContext, key_cio: str):
                                         f'\n |  ───── :gear: *Checking Result* :gear: ───── |'
                                         f'\n |'
                                         )
-    time.sleep(1.2)
 
     winner = gm_f.chk_result(
-        CHOICE=CHOICES,
-        name=ctx.author.name,
+        CHOICE=choice,
         plyr_choice=plyr_choice,
         cpu_choice=cpu_choice
     )
-    print(winner[1])
-    await gm_f.updt_bal(
+    await gm_f.bal_update(
         ctx=ctx,
-        bal=BETTING_AMT,
+        bal=betting_amt,
         winner_val=winner[1],
         plyr_choice=plyr_choice,
         cpu_choice=cpu_choice
@@ -106,38 +163,30 @@ async def playing(ctx: interact.CommandContext, key_cio: str):
     winner_msg = await original_msg.edit(f'{check_msg.content}\n |  {winner[0]}')
 
     if winner[1] == plyr_choice:
-        winner_reward = await original_msg.edit(
-            f'{winner_msg.content}'
-            f'\n |          :trophy:   ***Winner :***     {plyr_name}  |'
-            f'\n |          :moneybag:   ***Loot :***     {BETTING_AMT[plyr_choice]}rs')
-        # next_round = await original_msg.edit(f"{winner_reward.content}\n |         :arrows_counterclockwise:   *Next Round in **3** seconds* | \n╰────────────────────────╯")
+        await original_msg.edit(f'{winner_msg.content}'
+                                f'\n |          :trophy:   ***Winner :***     {plyr_name}  |'
+                                f'\n |          :moneybag:   ***Loot :***     {betting_amt[plyr_choice]}rs')
         await original_msg.edit(f'{winner_msg.content} \n╰────────────────────────╯')
 
         # await gm_f.countdown_timer(ctx, 3, next_round)
-        time.sleep(3)
-        wins += 1
-
+        await gm_f.update_stats(ctx, wins=1)  # Updating stats.../
 
     elif winner[1] == cpu_choice:
-        winner_reward = await original_msg.edit(
-            f'{winner_msg.content}'
-            f'\n |          :trophy:   ***Winner :***     CPU|'
-            f'\n |          ❌   ***Lost :***     {BETTING_AMT[plyr_choice]}rs')
-        #         next_round = await original_msg.edit(f"{winner_reward.content}\n |          :arrows_counterclockwise:   *Next Round in **3** seconds* | \n╰────────────────────────╯")
+        await original_msg.edit(f'{winner_msg.content}'
+                                f'\n |          :trophy:   ***Winner :***     CPU|'
+                                f'\n |          ❌   ***Lost :***     {betting_amt[plyr_choice]}rs')
         await original_msg.edit(f'{winner_msg.content} \n╰────────────────────────╯')
-
         # await gm_f.countdown_timer(ctx, 3, next_round)
-        time.sleep(3)
-        loses += 1
 
+        await gm_f.update_stats(ctx, loses=1)  # Updating stats.../
 
     elif winner[1] == 'draw':
-        #         next_round = await original_msg.edit(f"{winner_msg.content}\n |          :arrows_counterclockwise:   *Next Round in **3** seconds* | \n╰───────────────────────╯")
+        # next_round = await original_msg.edit(f"{winner_msg.content}\n |          :arrows_counterclockwise:   *Next
+        # Round in **3** seconds* | \n╰───────────────────────╯")
         await original_msg.edit(f'{winner_msg.content} \n╰────────────────────────╯')
-
         # await gm_f.countdown_timer(ctx, 5, next_round)
-        time.sleep(3)
-        draws += 1
+
+        await gm_f.update_stats(ctx, draws=1)  # Updating stats.../
 
     #  Next Round.../
     rounds += 1
@@ -149,14 +198,11 @@ async def playing(ctx: interact.CommandContext, key_cio: str):
 async def water(ctx: interact.CommandContext):
     global select_and_del
 
-    if not m.is_current_user(ctx):
-        await ctx.send(m.INTERFERE_MSG)
+    if await bs_f.user_validation(ctx, interfere=True, new_player=True):
         return
 
     await select_and_del.delete()
-
-    await playing(ctx, 's')
-    await gm_f.updating_stats(ctx, wins, loses, draws)
+    await playing(ctx, 1)
 
 
 #  .................... Choice water ..................../
@@ -164,17 +210,11 @@ async def water(ctx: interact.CommandContext):
 async def water(ctx: interact.CommandContext):
     global select_and_del
 
-    if not m.is_current_user(ctx):
-        await ctx.send(m.INTERFERE_MSG)
+    if await bs_f.user_validation(ctx, interfere=True, new_player=True):
         return
 
     await select_and_del.delete()
-
-    to_del = await ctx.channel.get_history()
-    await  to_del[0].delete()
-
-    await playing(ctx, 'w')
-    await gm_f.updating_stats(ctx, wins, loses, draws)
+    await playing(ctx, 2)
 
 
 #  .................... Choice gun ..................../
@@ -182,29 +222,21 @@ async def water(ctx: interact.CommandContext):
 async def gun(ctx: interact.CommandContext):
     global select_and_del
 
-    if not m.is_current_user(ctx):
-        await ctx.send(m.INTERFERE_MSG)
+    if await bs_f.user_validation(ctx, interfere=True, new_player=True):
         return
 
     await select_and_del.delete()
-
-    to_del = await ctx.channel.get_history()
-    await  to_del[0].delete()
-
-    await playing(ctx, 'g')
-    await gm_f.updating_stats(ctx, wins, loses, draws)
+    await playing(ctx, 3)
 
 
 #  .................... Choice gun ..................../
 @client.component('quite')
 async def quite(ctx: interact.CommandContext):
-    global select_and_del
     global rounds
+    global select_and_del
 
-    if not m.is_current_user(ctx):
-        await ctx.send(m.INTERFERE_MSG)
+    if await bs_f.user_validation(ctx, interfere=True, new_player=True):
         return
-    await select_and_del.delete()
 
-    rounds = 1
-    mm.select_and_del = await ctx.send('# Main Menu:-\n', components=menu_option)
+    await select_and_del.delete()
+    mm.select_and_del = await ctx.send('# Main Menu:-\n', components=mm.menu_options)

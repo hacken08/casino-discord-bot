@@ -1,4 +1,3 @@
-
 import random
 import time
 import interactions
@@ -7,6 +6,7 @@ import database as db
 from snake_water_gun.lib import status_messages as win
 
 plr_score = 0
+
 
 async def countdown_timer(ctx, seconds_left, new_msg: interactions.api.models.message.Message):
     """
@@ -19,9 +19,8 @@ async def countdown_timer(ctx, seconds_left, new_msg: interactions.api.models.me
     Returns:
 
     """
-
     for i in range(seconds_left, 0, -1):
-        edit_msg = new_msg.content.replace(str(seconds_left), f'{str(i-1)}')
+        edit_msg = new_msg.content.replace(str(seconds_left), f'{str(i - 1)}')
 
         await new_msg.edit(edit_msg)
         time.sleep(0.5)
@@ -29,7 +28,21 @@ async def countdown_timer(ctx, seconds_left, new_msg: interactions.api.models.me
     return new_msg
 
 
-def chk_result(CHOICE, name, plyr_choice, cpu_choice):
+def cpu_choice(plyr_chio, choices: dict):
+    if plyr_chio == choices[1]:
+        chio = [choices[2], choices[2], choices[3], choices[1]]
+        return random.choice(chio)
+
+    elif plyr_chio == choices[2]:
+        chio = [choices[3], choices[3], choices[1], choices[2]]
+        return random.choice(chio)
+
+    elif plyr_chio == choices[3]:
+        chio = [choices[1], choices[1], choices[2], choices[3]]
+        return random.choice(chio)
+
+
+def chk_result(CHOICE, plyr_choice, cpu_choice):
     """
     Check plyr choice and cpu choice
     :param CHOICE
@@ -54,15 +67,14 @@ def chk_result(CHOICE, name, plyr_choice, cpu_choice):
     loss = random.choice(win.loss_msgs)
     loss = new_line(loss)
 
-
     # Checking if user is losing or winning..../
-    if plyr_choice == CHOICE['s'] and cpu_choice == CHOICE['w']:
+    if plyr_choice == CHOICE[1] and cpu_choice == CHOICE[2]:
         return f"{snake_win}", plyr_choice
 
-    elif plyr_choice == CHOICE['w'] and cpu_choice == CHOICE['g']:
+    elif plyr_choice == CHOICE[2] and cpu_choice == CHOICE[3]:
         return f"{water_win}", plyr_choice
 
-    elif plyr_choice == CHOICE['g'] and cpu_choice == CHOICE['s']:
+    elif plyr_choice == CHOICE[3] and cpu_choice == CHOICE[1]:
         return f"{gun_win}", plyr_choice
 
     elif plyr_choice == cpu_choice:
@@ -72,7 +84,7 @@ def chk_result(CHOICE, name, plyr_choice, cpu_choice):
         return f"{loss}", cpu_choice
 
 
-async def updt_bal(ctx: interactions.CommandContext,bal, winner_val, plyr_choice, cpu_choice):
+async def bal_update(ctx: interactions.CommandContext, bal, winner_val, plyr_choice, cpu_choice):
     """
     Updates the score of player according to win and lose
     :param bal:
@@ -83,11 +95,12 @@ async def updt_bal(ctx: interactions.CommandContext,bal, winner_val, plyr_choice
     :return: updated score
     """
     user = ctx.user.username
+    print(bal)
+    print(plyr_choice)
 
     #  User data
     data = db.get_plyr_data(user)
     balance = data['balance']['value']
-
 
     if winner_val == plyr_choice and winner_val != cpu_choice:
         balance += bal[plyr_choice]
@@ -101,53 +114,35 @@ async def updt_bal(ctx: interactions.CommandContext,bal, winner_val, plyr_choice
     db.update_plyr_data(user, 'balance.value', balance)
 
 
-async def updating_stats(ctx: interactions.CommandContext, wins, loses, draws):
+async def update_stats(ctx: interactions.CommandContext, wins=0, loses=0, draws=0):
+    """
+    Args:
+        ctx:
+        wins:
+        loses:
+        draws:
+
+    Returns:
+    """
     data = db.get_plyr_data(ctx.user.username)
 
-    total_wins = data['games']['snake water gun']['wins']
-    total_loses = data['games']['snake water gun']['loses']
-    total_draws = data['games']['snake water gun']['draws']
+    total_wins = data['games']['snake_water_gun']['wins']
+    total_loses = data['games']['snake_water_gun']['loses']
+    total_draws = data['games']['snake_water_gun']['draws']
 
     total_wins += wins  # Remove the comma here
     total_loses += loses  # Remove the comma here
     total_draws += draws  # Remove the comma here
 
-    db.update_plyr_data(ctx.user.username, 'games.snake water gun.wins', total_wins)
-    db.update_plyr_data(ctx.user.username, 'games.snake water gun.loses', total_loses)
-    db.update_plyr_data(ctx.user.username, 'games.snake water gun.draws', total_draws)
+    val = {
+        'games.snake_water_gun.wins': total_wins,
+        'games.snake_water_gun.loses': total_loses,
+        'games.snake_water_gun.draws': total_draws,
+    }
 
+    for key, value in val.items():
+        db.update_plyr_data(ctx.user.username, key, value)
 
-def want_to_play_again():
-    """
-    Asks the user to play again
-    :return: True or False
-    """
-    while True:
-        play_again = input('Would you like to play? (y/n): ')
-
-        if play_again.lower() == 'y':
-            return True
-            break
-        elif play_again.lower() == 'n':
-            return False
-
-        else:
-            print('Invalid input. Try again.')
-
-
-
-def reset():
-    """
-    Resets the
-    """
-    global plr_score
-    plr_score = 0
-
-    print('Score Reset Successfully')
-    print('Current Score: ', plr_score)
-
-    print('menu...')
-    time.sleep(1.3)
 
 def new_line(input_string):
     words = input_string.split()
