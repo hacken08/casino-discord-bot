@@ -14,6 +14,7 @@ select_and_del = interactions.api.models.message.Message()
 # .............. Customizable user setting Variables ..............
 play_style = ['Buttons', "Text Command"]
 choices_style = 'snake water gun'
+change_style = 'Rock Paper scissors'
 
 #  ..... Settings options:- ...../
 setting_option = [
@@ -25,7 +26,7 @@ setting_option = [
                 style=STYLE,
             ),
             interactions.Button(
-                label=choices_style.title(),
+                label=change_style.title(),
                 custom_id='cho_style',
                 style=STYLE,
             ),
@@ -42,19 +43,22 @@ setting_option = [
 def chck_style(x):
     global choices_style
     global setting_option
-    choices_style = x
+    global change_style
 
     #  ..... Settings options:- ...../
+    change_style = choices_style
+    choices_style = x
+
     setting_option = [
         interactions.ActionRow(
             components=[
                 interactions.Button(
                     label=f"Play style {play_style[0]}".title(),
-                    custom_id='next_round_wait',
+                    custom_id='play_style',
                     style=STYLE,
                 ),
                 interactions.Button(
-                    label=choices_style.title(),
+                    label=change_style.title(),
                     custom_id='cho_style',
                     style=STYLE,
                 ),
@@ -67,17 +71,11 @@ def chck_style(x):
         )
     ]
 
-
+,,
 # ..... settings Action ...../
-@client.component("next_round_wait")
-async def next_round_wait(ctx: interactions.CommandContext):
-    global select_and_del
-
-    if await bs_f.user_validation(ctx, new_player=True):
-        return
-
-    await select_and_del.delete()
-    await ctx.send("Waiting for next round...")
+@client.component('play_style')
+def change_ply_style(ctx: interactions.CommandContext):
+    pass
 
 
 @client.component("cho_style")

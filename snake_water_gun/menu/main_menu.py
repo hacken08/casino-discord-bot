@@ -8,7 +8,7 @@ from snake_water_gun import basin_funct as bs_f
 
 from .txt import description
 from bot import client
-from .. import custmizable as custm
+from .. import changeable as custm
 
 # from snake_water_gun.Game_functions import main as mm
 

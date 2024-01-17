@@ -3,7 +3,7 @@ import time
 import interactions as interact
 
 from snake_water_gun.lib import single_player as ch
-from snake_water_gun import custmizable as custm
+from snake_water_gun import changeable as custm
 from snake_water_gun import basin_funct as bs_f
 
 from bot import client

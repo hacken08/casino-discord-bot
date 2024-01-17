@@ -1,7 +1,7 @@
 import time
 
 from snake_water_gun.menu import main_menu as mm
-from snake_water_gun import custmizable as custm
+from snake_water_gun import changeable as custm
 from snake_water_gun import basin_funct as bs_f
 
 import interactions
@@ -16,7 +16,7 @@ async def join(ctx: interactions.CommandContext):
     new = db.is_plyr_new(user.username)
 
     if not new:
-        msg = await ctx.send(f'**|**  **{ctx.author.name}**  already **joined** this casino :handshake:')
+        msg = await ctx.send(custm.ALRDY_PLYR_JOIN.replace('<>', ctx.author.name))
         # time.sleep(ERROR_MSG_INTERVAL)
         #
         # await msg.delete()
@@ -31,8 +31,7 @@ async def join(ctx: interactions.CommandContext):
             bot=user.bot,
             date=time.ctime(),
         )
-        await ctx.send(
-            f' **|**  **{ctx.author.name}** have **joined** our casino, **successfully**   :white_check_mark:')
+        await ctx.send(custm.NEW_PLYR_JOIN.replace('<>', ctx.author.user))
 
     except Exception as e:
         msg = await ctx.send('⛔ **|**  Something went wrong ')
@@ -86,7 +85,7 @@ async def balance(ctx: interactions.CommandContext):
     """
     #  Checking if user exits
     if db.is_plyr_new(ctx.user.username):
-        msg = await ctx.send('❌ **|**  Your account **Not Found**. Please **Join** casino first  😿')
+        msg = await ctx.send(custm.ACCOUNT_NOT_FOUND)
         time.sleep(custm.ERROR_MSG_INTERVEL)
 
         await msg.delete()
@@ -97,6 +96,46 @@ async def balance(ctx: interactions.CommandContext):
 
     show_bal = f'**| {ctx.author.name}** account balance = **{bal} 💰 **'
     await ctx.channel.send(show_bal)
+
+
+@client.command(
+    description='To play coin flip',
+    options=[
+        interactions.Option(
+            name='second_player',
+            description='Tag second player',
+            required=True,
+            type=interactions.OptionType.STRING  # Use STRING type for mentions
+        ),
+    ]
+)
+async def add_plry(ctx: interactions.CommandContext, second_player: str):
+
+    try:
+        # Extracting the user ID from the mention
+        user_id = int(second_player[2:-1])
+
+        # Getting the Member object using the user ID
+        mentioned_member = await ctx.guild.get_member(user_id)
+
+        if mentioned_member.user.username == custm.SECOND_PLYR:
+            await ctx.send(custm.SECOND_PLYR_EXISTS.replace('<>', mentioned_member.name))
+            return
+
+        elif mentioned_member.user.username == ctx.user.username:
+            await ctx.send(custm.CANT_ADD_YOU)
+            return
+
+        elif mentioned_member:
+            custm.SECOND_PLYR = mentioned_member.user.username
+            await ctx.send(custm.SECOND_PLYR_JOIN.replace('<>', mentioned_member.name))
+            print(custm.SECOND_PLYR)
+
+        else:
+            await ctx.send('User not found!')
+
+    except (TypeError, ValueError) as e:
+        await ctx.send(custm.PLYR_NOT_MENTION)
 
 
 if __name__ == '__main__':

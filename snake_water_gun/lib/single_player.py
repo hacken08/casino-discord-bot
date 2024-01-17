@@ -88,12 +88,12 @@ def choice_style(choices_style):
         interact.ActionRow(
             components=[
                 interact.Button(
-                    label=f'{display[1]} / 200rs'.title(),
+                    label=f'{display[0]} / 200rs'.title(),
                     custom_id="snake",
                     style=STYLE,
                 ),
                 interact.Button(
-                    label=f'{display[0]} / 500rs'.title(),
+                    label=f'{display[1]} / 500rs'.title(),
                     custom_id="water",
                     style=STYLE,
                 ),
@@ -114,9 +114,10 @@ def choice_style(choices_style):
 
 
 #  ................. Playing  .................
-async def playing(ctx: interact.CommandContext, key_cio: int):
+async def playing(ctx: interact.CommandContext, key_cio: int, second_plyr=False):
     """
     Args:
+        second_plyr:
         ctx:
         key_cio (object):
     """
@@ -131,13 +132,19 @@ async def playing(ctx: interact.CommandContext, key_cio: int):
     original_msg = await ctx.send(f'╭─────── :dagger:  **Round {rounds}** :dagger:    ───────╮')
 
     #  Player input.../
-    plyr_choice = choice[key_cio]
-    cpu_choice = gm_f.cpu_choice(plyr_choice, choice)
+    cpu_choice = ''
+    plyr_choice = ''
+
+    if not second_plyr:
+        plyr_choice = choice[key_cio]
+        cpu_choice = gm_f.cpu_choice(plyr_choice, choice)
+    elif second_plyr:
+        pass
 
     # Player vs CPU.../
     msg = (f'{original_msg.content}'
            f'\n |    **↓ {plyr_name} ↓                            ↓ CPU ↓**'
-           f'\n |   {plyr_choice}          *** __vs__***       {cpu_choice}')
+           f'\n |   {plyr_choice}           *** __vs__***         {cpu_choice}')
     vs_msg = await original_msg.edit(msg)
 
     #  Checking and Updating results.../

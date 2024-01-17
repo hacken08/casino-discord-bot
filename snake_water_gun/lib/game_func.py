@@ -4,6 +4,7 @@ import interactions
 
 import database as db
 from snake_water_gun.lib import status_messages as win
+from snake_water_gun.menu import setting_menu as sm
 
 plr_score = 0
 
@@ -17,7 +18,6 @@ async def countdown_timer(ctx, seconds_left, new_msg: interactions.api.models.me
         seconds_left:
 
     Returns:
-
     """
     for i in range(seconds_left, 0, -1):
         edit_msg = new_msg.content.replace(str(seconds_left), f'{str(i - 1)}')
@@ -46,36 +46,35 @@ def chk_result(CHOICE, plyr_choice, cpu_choice):
     """
     Check plyr choice and cpu choice
     :param CHOICE
-    :param name:
     :param plyr_choice:
     :param cpu_choice:
-    :return: winner choice
+    :return: winner choice and winner msg
     """
-    #  some random status message for user......../
-    snake_win = random.choice(win.snake_win_msgs)
-    snake_win = new_line(snake_win)
+    # some random status message for user......../
+    # win_msg = tuple()
 
-    water_win = random.choice(win.water_win_msgs)
-    water_win = new_line(water_win)
+    if sm.choices_style == 'snake water gun':
+        win_msg = swg_msg()
 
-    gun_win = random.choice(win.gun_win_msgs)
-    gun_win = new_line(gun_win)
+    else:
+        win_msg = rps_msg()
 
-    draw = random.choice(win.draw_msgs)
+    draw = random.choice(win.draw_messages)
     draw = new_line(draw)
 
-    loss = random.choice(win.loss_msgs)
+    loss = random.choice(win.loss_messages)
     loss = new_line(loss)
+
 
     # Checking if user is losing or winning..../
     if plyr_choice == CHOICE[1] and cpu_choice == CHOICE[2]:
-        return f"{snake_win}", plyr_choice
+        return f"{win_msg[0]}", plyr_choice
 
     elif plyr_choice == CHOICE[2] and cpu_choice == CHOICE[3]:
-        return f"{water_win}", plyr_choice
+        return f"{win_msg[1]}", plyr_choice
 
     elif plyr_choice == CHOICE[3] and cpu_choice == CHOICE[1]:
-        return f"{gun_win}", plyr_choice
+        return f"{win_msg[2]}", plyr_choice
 
     elif plyr_choice == cpu_choice:
         return f"{draw}", 'draw'
@@ -153,3 +152,29 @@ def new_line(input_string):
 
     output_string = '\n |   '.join(' '.join(words[i:i + 6]) for i in range(0, len(words), 6))
     return output_string
+
+
+def swg_msg():
+    snake_win = random.choice(win.snake_win_msgs)
+    snake_win = new_line(snake_win)
+
+    water_win = random.choice(win.water_win_msgs)
+    water_win = new_line(water_win)
+
+    gun_win = random.choice(win.gun_win_msgs)
+    gun_win = new_line(gun_win)
+
+    return snake_win, water_win, gun_win
+
+
+def rps_msg():
+    rocks = random.choice(win.win_messages_rock)
+    rocks = new_line(rocks)
+
+    paper = random.choice(win.win_messages_paper)
+    paper = new_line(paper)
+
+    scissor = random.choice(win.win_messages_scissors)
+    scissor = new_line(scissor)
+
+    return paper, rocks, scissor

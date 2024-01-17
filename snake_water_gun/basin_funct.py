@@ -1,9 +1,9 @@
 
 import interactions as interacts
 
-from snake_water_gun.custmizable import  CURRENT_PLAYER
+from snake_water_gun.changeable import  CURRENT_PLAYER
 import database as db
-from snake_water_gun import custmizable as custm
+from snake_water_gun import changeable as custm
 
 
 def is_current_user(ctx):
