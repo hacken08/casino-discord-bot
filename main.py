@@ -1,12 +1,20 @@
+import interactions
 import time
 
 from snake_water_gun.menu import main_menu as mm
+from snake_water_gun.lib.players import Player
+from snake_water_gun.lib import multi_player as mplr
+
 from snake_water_gun import changeable as custm
 from snake_water_gun import basin_funct as bs_f
 
-import interactions
 from bot import client
 import database as db
+
+
+
+plyr1 = Player()
+plyr2 = Player()
 
 
 #  ........ Creating new player ........../
@@ -16,7 +24,7 @@ async def join(ctx: interactions.CommandContext):
     new = db.is_plyr_new(user.username)
 
     if not new:
-        msg = await ctx.send(custm.ALRDY_PLYR_JOIN.replace('<>', ctx.author.name))
+        await ctx.send(custm.ALRDY_PLYR_JOIN.replace('<>', ctx.author.name))
         # time.sleep(ERROR_MSG_INTERVAL)
         #
         # await msg.delete()
@@ -47,11 +55,13 @@ async def snake_water_gun(ctx: interactions.CommandContext):
     """
     To play snake-water
     """
-    custm.CURRENT_PLAYER = ctx.user.username
+    global plyr1
 
     #  Checking if user exits
     if await bs_f.user_validation(ctx, new_player=True):
         return
+
+    plyr1 = Player(ctx.author.name, ctx.user.username, ctx.user.mention)
 
     #  Starting game
     mm.select_and_del = await ctx.send(f'# Snake Water Gun :-', components=mm.menu_options)
@@ -110,8 +120,12 @@ async def balance(ctx: interactions.CommandContext):
     ]
 )
 async def add_player(ctx: interactions.CommandContext, second_player: str):
-
+    global plyr1
+    global plyr2
     try:
+        joining_msg = await ctx.send(custm.CHECKING_PLYR2)
+        plyr1 = Player(ctx.author.name, ctx.user.username, ctx.user.mention)
+
         # Extracting the user ID from the mention
         user_id = int(second_player[2:-1])
 
@@ -121,15 +135,16 @@ async def add_player(ctx: interactions.CommandContext, second_player: str):
         # Validation user and second player
         if await bs_f.user_validation(ctx, interfere=True, new_player=True):
             return
-        elif await bs_f.second_plyr_validation(ctx, mentioned_member):
+        elif await bs_f.second_plyr_validation(ctx, mentioned_member, joining_msg):
             return
 
         # Joining second player to play with
+        plyr2 = Player(mentioned_member.name, mentioned_member.user.username, mentioned_member.mention)
+        await joining_msg.edit(custm.SECOND_PLYR_JOIN.replace('<>', plyr2.name))
         custm.SECOND_PLYR = mentioned_member.user.username
-        await ctx.send(custm.JOINED)
 
-    except (TypeError, ValueError) as e:
-        await ctx.send(custm.PLYR_NOT_MENTION)
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':

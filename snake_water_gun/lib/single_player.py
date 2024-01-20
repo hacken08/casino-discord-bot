@@ -21,17 +21,17 @@ choices = [
         components=[
             interact.Button(
                 label=f'Snake / 200rs'.title(),
-                custom_id="snake",
+                custom_id="s_snake",
                 style=STYLE,
             ),
             interact.Button(
                 label=f'Water / 500rs'.title(),
-                custom_id="water",
+                custom_id="s_water",
                 style=STYLE,
             ),
             interact.Button(
                 label=f'Gun / 700rs'.title(),
-                custom_id="gun",
+                custom_id="s_gun",
                 style=STYLE,
             ),
             interact.Button(
@@ -125,7 +125,7 @@ async def pvc(ctx: interact.CommandContext, key_cio: int):
 
 
 #  .................... choice snake ..................../
-@client.component('snake')
+@client.component('s_snake')
 async def water(ctx: interact.CommandContext):
     global select_and_del
 
@@ -137,7 +137,7 @@ async def water(ctx: interact.CommandContext):
 
 
 #  .................... Choice water ..................../
-@client.component('water')
+@client.component('s_water')
 async def water(ctx: interact.CommandContext):
     global select_and_del
 
@@ -149,7 +149,7 @@ async def water(ctx: interact.CommandContext):
 
 
 #  .................... Choice gun ..................../
-@client.component("gun")
+@client.component("s_gun")
 async def gun(ctx: interact.CommandContext):
     global select_and_del
 

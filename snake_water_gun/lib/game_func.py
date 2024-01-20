@@ -69,7 +69,6 @@ def chk_result(plyr_choice, cpu_choice):
     loss = random.choice(win.loss_messages)
     loss = new_line(loss)
 
-
     # Checking if user is losing or winning..../
     choice = gm_s.choice
     if plyr_choice == choice[1] and cpu_choice == choice[2]:
@@ -146,6 +145,43 @@ async def update_stats(ctx: interactions.CommandContext, wins=0, loses=0, draws=
 
     for key, value in val.items():
         db.update_plyr_data(ctx.user.username, key, value)
+
+
+def pvp_chck_result(plyr1_choice, plyr2_choice):
+    """
+    Check plyr choice and cpu choice
+    :param plyr1_choice:
+    :param plyr2_choice:
+    :return: winner choice and winner msg
+    """
+    # some random status message for user......../
+    if sm.choices_style == 'snake water gun':
+        win_msg = swg_msg()
+    else:
+        win_msg = rps_msg()
+
+    draw = random.choice(win.draw_messages)
+    draw = new_line(draw)
+
+    loss = random.choice(win.loss_messages)
+    loss = new_line(loss)
+
+
+    # Checking if user is losing or winning..../
+    choice = gm_s.choice
+    if plyr1_choice == choice[1] and plyr2_choice == choice[2]:
+        return f"{win_msg[0]}", plyr1_choice, plyr2_choice
+
+    elif plyr1_choice == choice[2] and plyr2_choice == choice[3]:
+        return f"{win_msg[1]}", plyr1_choice, plyr2_choice
+
+    elif plyr1_choice == choice[3] and plyr2_choice == choice[1]:
+        return f"{win_msg[2]}", plyr1_choice, plyr2_choice
+
+    elif plyr1_choice == plyr2_choice:
+        return f"{draw}", 'draw'
+    else:
+        return f"{loss}", plyr2_choice, plyr1_choice
 
 
 def new_line(input_string):

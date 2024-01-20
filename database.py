@@ -1,9 +1,7 @@
-
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from cred import crds
-
 
 #  ... initializing firebase firestore ...../
 cred = credentials.Certificate(crds)
@@ -41,6 +39,7 @@ def create_player(player_uid, name, email, bot: bool, avatar, date):
     players = db.collection('bot users').document(player_uid)
     players.set(info)
 
+
 def is_plyr_new(uid):
     """
     Check if player is new or not
@@ -54,6 +53,7 @@ def is_plyr_new(uid):
             return False
     else:
         return True
+
 
 def get_plyr_data(uid):
     """
