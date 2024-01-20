@@ -1,11 +1,9 @@
 import interactions
 
 from snake_water_gun import basin_funct as bs_f
-from snake_water_gun.lib import single_player as sp
+from snake_water_gun.lib import  game_style as gm_s
 
 from bot import client
-
-# from main_menu import menu_options
 
 
 STYLE = interactions.ButtonStyle.SECONDARY  # Button Style
@@ -71,7 +69,7 @@ def chck_style(x):
         )
     ]
 
-,,
+
 # ..... settings Action ...../
 @client.component('play_style')
 def change_ply_style(ctx: interactions.CommandContext):
@@ -88,7 +86,7 @@ async def choice_style(ctx: interactions.CommandContext):
     await select_and_del.delete()
 
     #  Changing Value by calling out function
-    changed = sp.choice_style(choices_style)
+    changed = gm_s.choice_style(choices_style)
 
     #  Sending changed message
     await ctx.send(f':sparkles: Your **Choice Style** Change to __*{changed}*__ **| Successfully**!  '

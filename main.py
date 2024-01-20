@@ -109,7 +109,7 @@ async def balance(ctx: interactions.CommandContext):
         ),
     ]
 )
-async def add_plry(ctx: interactions.CommandContext, second_player: str):
+async def add_player(ctx: interactions.CommandContext, second_player: str):
 
     try:
         # Extracting the user ID from the mention
@@ -118,21 +118,15 @@ async def add_plry(ctx: interactions.CommandContext, second_player: str):
         # Getting the Member object using the user ID
         mentioned_member = await ctx.guild.get_member(user_id)
 
-        if mentioned_member.user.username == custm.SECOND_PLYR:
-            await ctx.send(custm.SECOND_PLYR_EXISTS.replace('<>', mentioned_member.name))
+        # Validation user and second player
+        if await bs_f.user_validation(ctx, interfere=True, new_player=True):
+            return
+        elif await bs_f.second_plyr_validation(ctx, mentioned_member):
             return
 
-        elif mentioned_member.user.username == ctx.user.username:
-            await ctx.send(custm.CANT_ADD_YOU)
-            return
-
-        elif mentioned_member:
-            custm.SECOND_PLYR = mentioned_member.user.username
-            await ctx.send(custm.SECOND_PLYR_JOIN.replace('<>', mentioned_member.name))
-            print(custm.SECOND_PLYR)
-
-        else:
-            await ctx.send('User not found!')
+        # Joining second player to play with
+        custm.SECOND_PLYR = mentioned_member.user.username
+        await ctx.send(custm.JOINED)
 
     except (TypeError, ValueError) as e:
         await ctx.send(custm.PLYR_NOT_MENTION)

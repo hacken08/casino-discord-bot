@@ -54,3 +54,19 @@ async def user_validation(
     except Exception as e:
         print(e)
 
+
+async def second_plyr_validation(ctx, mentioned_member):
+
+    if not mentioned_member:
+        await ctx.send('User not found!')
+        return True
+
+    elif mentioned_member.user.username == custm.SECOND_PLYR:
+        await ctx.send(custm.SECOND_PLYR_EXISTS.replace('<>', mentioned_member.name))
+        return True
+
+    elif mentioned_member.user.username == ctx.user.username:
+        await ctx.send(custm.CANT_ADD_YOU)
+        return True
+
+    return False

@@ -2,9 +2,11 @@ import random
 import time
 import interactions
 
-import database as db
 from snake_water_gun.lib import status_messages as win
+from snake_water_gun.lib import  game_style as gm_s
+
 from snake_water_gun.menu import setting_menu as sm
+import database as db
 
 plr_score = 0
 
@@ -28,7 +30,9 @@ async def countdown_timer(ctx, seconds_left, new_msg: interactions.api.models.me
     return new_msg
 
 
-def cpu_choice(plyr_chio, choices: dict):
+def cpu_choice(plyr_chio):
+    choices = gm_s.choice
+
     if plyr_chio == choices[1]:
         chio = [choices[2], choices[2], choices[3], choices[1]]
         return random.choice(chio)
@@ -42,7 +46,7 @@ def cpu_choice(plyr_chio, choices: dict):
         return random.choice(chio)
 
 
-def chk_result(CHOICE, plyr_choice, cpu_choice):
+def chk_result(plyr_choice, cpu_choice):
     """
     Check plyr choice and cpu choice
     :param CHOICE
@@ -67,13 +71,14 @@ def chk_result(CHOICE, plyr_choice, cpu_choice):
 
 
     # Checking if user is losing or winning..../
-    if plyr_choice == CHOICE[1] and cpu_choice == CHOICE[2]:
+    choice = gm_s.choice
+    if plyr_choice == choice[1] and cpu_choice == choice[2]:
         return f"{win_msg[0]}", plyr_choice
 
-    elif plyr_choice == CHOICE[2] and cpu_choice == CHOICE[3]:
+    elif plyr_choice == choice[2] and cpu_choice == choice[3]:
         return f"{win_msg[1]}", plyr_choice
 
-    elif plyr_choice == CHOICE[3] and cpu_choice == CHOICE[1]:
+    elif plyr_choice == choice[3] and cpu_choice == choice[1]:
         return f"{win_msg[2]}", plyr_choice
 
     elif plyr_choice == cpu_choice:
